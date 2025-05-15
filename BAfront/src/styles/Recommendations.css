@@ -1,0 +1,279 @@
+/* Recommendations Page Styles */
+.recommendations-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.page-title {
+  color: #e91e63;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 2.2rem;
+}
+
+/* Loading state */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #e91e63;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error state */
+.error-message {
+  text-align: center;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.error-message h3 {
+  color: #d32f2f;
+  margin-bottom: 15px;
+}
+
+.error-message p {
+  margin-bottom: 25px;
+  color: #666;
+}
+
+.retry-button {
+  background-color: #e91e63;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+/* No recommendations state */
+.no-recommendations {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.no-recommendations h2 {
+  color: #e91e63;
+  margin-bottom: 15px;
+}
+
+.no-recommendations p {
+  margin-bottom: 30px;
+  color: #666;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.upload-photo-button, .upload-new-photo-button {
+  display: inline-block;
+  background-color: #e91e63;
+  color: white;
+  text-decoration: none;
+  padding: 12px 25px;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.upload-photo-button:hover, .upload-new-photo-button:hover {
+  background-color: #d81b60;
+  text-decoration: none;
+}
+
+/* Recommendation cards */
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.recommendation-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-5px);
+}
+
+.recommendation-image {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.recommendation-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image {
+  background-color: #f5f5f5;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+.recommendation-details {
+  padding: 20px;
+}
+
+.recommendation-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.event-type {
+  background-color: #f5f5f5;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: #555;
+  font-weight: 500;
+}
+
+.recommendation-details h3 {
+  color: #e91e63;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.attributes {
+  margin-bottom: 20px;
+}
+
+.attribute {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.attribute-label {
+  font-weight: 600;
+  color: #555;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.attribute-value {
+  color: #333;
+}
+
+.recommendations-text {
+  margin-bottom: 20px;
+}
+
+.recommendation-section {
+  margin-bottom: 15px;
+}
+
+.recommendation-section h4 {
+  color: #555;
+  margin-bottom: 5px;
+  font-size: 1.05rem;
+}
+
+.recommendation-section p {
+  color: #666;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.view-details-button, .leave-feedback-button {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.view-details-button {
+  background-color: #e91e63;
+  color: white;
+}
+
+.leave-feedback-button {
+  background-color: #f5f5f5;
+  color: #555;
+}
+
+.view-details-button:hover {
+  background-color: #d81b60;
+}
+
+.leave-feedback-button:hover {
+  background-color: #eaeaea;
+}
+
+/* Get more recommendations section */
+.get-more-recommendations {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  margin-top: 50px;
+}
+
+.get-more-recommendations h3 {
+  color: #e91e63;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.get-more-recommendations p {
+  margin-bottom: 25px;
+  color: #666;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+}
