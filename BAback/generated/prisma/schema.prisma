@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Feedback {
+  id                Int            @id @default(autoincrement())
+  feedback_text     String?
+  rating            Int            @default(3)
+  created_at        DateTime       @default(now())
+  user_id           Int
+  recommendation_id Int
+  Recommendation    Recommendation @relation(fields: [recommendation_id], references: [id])
+  User              User           @relation(fields: [user_id], references: [id])
+}
+
+model Photo {
+  id             Int              @id @default(autoincrement())
+  photo_url      String
+  uploaded_at    DateTime         @default(now())
+  user_id        Int
+  User           User             @relation(fields: [user_id], references: [id])
+  Recommendation Recommendation[]
+}
+
+model Recommendation {
+  id                    Int        @id @default(autoincrement())
+  event_type            String?
+  face_shape            String?
+  skin_tone             String?
+  hair_color            String?
+  recommended_makeup    String?
+  recommended_hairstyle String?
+  created_at            DateTime   @default(now())
+  user_id               Int
+  photo_id              Int
+  Feedback              Feedback[]
+  Photo                 Photo      @relation(fields: [photo_id], references: [id])
+  User                  User       @relation(fields: [user_id], references: [id])
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  full_name       String
+  age             Int
+  gender          Gender
+  username        String
+  hashed_password String
+  jwt_token       String?
+  created_at      DateTime         @default(now())
+  Feedback        Feedback[]
+  Photo           Photo[]
+  Recommendation  Recommendation[]
+}
+
+enum Gender {
+  male
+  female
+}
