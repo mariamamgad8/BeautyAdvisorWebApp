@@ -9,11 +9,13 @@ const Home = () => {
           <h1>Beauty Advisor</h1>
           <p>Your personal guide to beauty recommendations tailored just for you</p>
           <button className="primary-button">Get Started</button>
-        </div>
-        <div className="hero-image">
+        </div>        <div className="hero-image">
           <div className="image-placeholder">
-            {/* Hero image will be placed here */}
-            <div className="placeholder-text">Beauty Image</div>
+            <img 
+              src={`${process.env.PUBLIC_URL}/images/placeholder.jpg`} 
+              // alt="Beauty advisor hero image showing a person with hair rollers on a phone" 
+              className="hero-img"
+            />
           </div>
         </div>
       </section>

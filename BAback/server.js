@@ -1,26 +1,58 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { PrismaClient } = require('./generated/prisma');
 const authRoutes = require('./routes/auth');
 const imageRoutes = require('./routes/images');
 const recommendationRoutes = require('./routes/recommendations');
 const feedbackRoutes = require('./routes/feedback');
+const { ensureDirectories } = require('./utils/ensureDirs');
+
+// Ensure required directories exist
+ensureDirectories();
 
 const app = express();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
+
+// Test database connection
+async function testConnection() {
+  try {
+    await prisma.$connect();
+    console.log('Successfully connected to the database');
+  } catch (error) {
+    console.error('Database connection error:', error);
+    process.exit(1);
+  }
+}
+
+testConnection();
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/images', imageRoutes);
-app.use('/api/recommendations', recommendationRoutes);
-app.use('/api/feedback', feedbackRoutes);
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// API Routes
+const apiRouter = express.Router();
+app.use('/api', apiRouter);
+
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/images', imageRoutes);
+apiRouter.use('/recommendations', recommendationRoutes);
+apiRouter.use('/feedback', feedbackRoutes);
 
 // Root route
 app.get('/', (req, res) => {

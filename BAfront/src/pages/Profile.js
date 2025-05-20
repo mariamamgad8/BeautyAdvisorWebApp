@@ -10,22 +10,25 @@ const Profile = () => {
     totalPhotos: 0,
     totalRecommendations: 0
   });
-
   useEffect(() => {
     fetchUserProfile();
   }, []);
 
   const fetchUserProfile = async () => {
-    try {
-      const response = await authService.getProfile();
-      setUser(response.data);
+    try {      const response = await authService.getProfile();
+      const userData = response.data;
+      console.log('Profile data received:', userData);
+      setUser(userData);
       setLoading(false);
-      
-      // For demo purposes, set some mock stats
-      // In a real app, this data would come from the API
+        // Get actual counts from the user data
+      console.log('Calculating stats from:', {
+        _count: userData._count,
+        photos: userData._count?.Photo,
+        recommendations: userData._count?.Recommendation
+      });
       setStats({
-        totalPhotos: response.data.photos?.length || 0,
-        totalRecommendations: response.data.recommendations?.length || 0
+        totalPhotos: userData._count?.Photo || 0,
+        totalRecommendations: userData._count?.Recommendation || 0
       });
     } catch (err) {
       console.error('Error fetching profile:', err);

@@ -93,8 +93,7 @@ const PhotoUpload = () => {
       const response = await imageService.uploadImage(formData);
       
       setSuccess('Image uploaded successfully! You can now generate recommendations.');
-      
-      // Redirect to recommendations generator with the new photo ID
+        // Redirect to recommendations generator with the new photo ID
       setTimeout(() => {
         window.location.href = `/recommendations/generate/${response.data.photo.id}`;
       }, 2000);

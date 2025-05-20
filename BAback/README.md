@@ -24,13 +24,17 @@ The Beauty Advisor backend is a Node.js/Express application that powers the Beau
 ## Project Structure
 
 ```
-BA/
+BAback/
 ├── middleware/       # Express middleware (auth, error handling)
+├── models/           # ML models for beauty recommendations
+│   ├── outputs/      # Temporary storage for model outputs
+│   └── requirements.txt # Python dependencies for the model
 ├── prisma/           # Database schema and migrations
 │   └── migrations/   # Database migration files
 ├── routes/           # API route definitions
 ├── uploads/          # Uploaded user photos
 ├── utils/            # Utility functions
+│   └── modelRunner.js # Python model integration utility
 ├── server.js         # Main application entry point
 └── package.json      # Project dependencies
 ```

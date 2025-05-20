@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import PhotoUpload from './pages/PhotoUpload';
 import Recommendations from './pages/Recommendations';
 import RecommendationDetail from './pages/RecommendationDetail';
+import RecommendationGenerator from './pages/RecommendationGenerator';
 import Profile from './pages/Profile';
 import FeedbackForm from './pages/FeedbackForm';
 
@@ -29,6 +30,7 @@ const App = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/upload" element={<PhotoUpload />} />
               <Route path="/recommendations" element={<Recommendations />} />
+              <Route path="/recommendations/generate/:photoId" element={<RecommendationGenerator />} />
               <Route path="/recommendations/:id" element={<RecommendationDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/feedback/new/:recommendationId" element={<FeedbackForm />} />

@@ -8,6 +8,11 @@ const prisma = new PrismaClient();
 
 // User Registration
 router.post('/register', async (req, res) => {
+  console.log('Received registration request:', {
+    ...req.body,
+    password: '[REDACTED]'
+  });
+  
   try {
     const { email, full_name, age, gender, username, password } = req.body;
 
@@ -24,12 +29,23 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Validate gender
+    if (!['male', 'female'].includes(gender.toLowerCase())) {
+      return res.status(400).json({ message: 'Invalid gender value. Must be "male" or "female".' });
+    }
+
+    // Validate age
+    const ageNum = parseInt(age);
+    if (isNaN(ageNum) || ageNum < 13 || ageNum > 120) {
+      return res.status(400).json({ message: 'Invalid age. Must be between 13 and 120.' });
+    }
+
     // Create new user
     const user = await prisma.user.create({
       data: {
         email,
         full_name,
-        age: parseInt(age),
+        age: ageNum,
         gender: gender.toLowerCase(),
         username,
         hashed_password: hashedPassword
@@ -133,17 +149,29 @@ router.get('/profile', async (req, res) => {
       process.env.JWT_SECRET || 'default_secret_change_this_in_production'
     );
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id }
-    });
+    // Get user data and direct counts in parallel
+    const [user, photoCount, recCount] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: decoded.id }
+      }),
+      prisma.photo.count({
+        where: { user_id: decoded.id }
+      }),
+      prisma.recommendation.count({
+        where: { user_id: decoded.id }
+      })
+    ]);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Return user data without password
+    // Return user data without password but with counts
     const { hashed_password, ...userData } = user;
+    userData._count = {
+      Photo: photoCount,
+      Recommendation: recCount
+    };
     res.status(200).json(userData);
 
   } catch (error) {

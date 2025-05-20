@@ -34,26 +34,85 @@ router.post('/generate/:photoId', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'Image file not found' });
     }
 
-    // Read the image as base64 for sending to ML API
-    const imageBuffer = fs.readFileSync(imagePath);
-    const base64Image = imageBuffer.toString('base64');
+    // Use our local model runner instead of an external API
+    const { runBeautyAdvisorModel } = require('../utils/modelRunner');
+    
+    // Run the model on the image
+    const modelResult = await runBeautyAdvisorModel(imagePath);
+    
+    if (modelResult.error) {
+      return res.status(400).json({ message: `Model error: ${modelResult.error}` });
+    }
 
-    // Send to ML model API
-    // Note: Replace the URL with your actual ML model API endpoint
-    const mlApiResponse = await axios.post(process.env.ML_API_URL || 'https://your-ml-api-endpoint.com/predict', {
-      image: base64Image,
-      // Any additional parameters required by your ML API
-    });
-
-    // Extract ML model results
-    const {
-      event_type,
-      face_shape,
-      skin_tone,
-      hair_color,
-      recommended_makeup,
-      recommended_hairstyle
-    } = mlApiResponse.data;
+    // Extract ML model results - handle both result structures
+    let face_shape, skin_tone, hair_color, recommended_makeup, recommended_hairstyle;
+    const event_type = "general"; // Default event type
+    
+    if (modelResult.features) {
+      // New structure with features and recommendations objects
+      const { features, recommendations } = modelResult;
+      face_shape = features.face_shape;
+      skin_tone = features.skin_tone_rgb ? `RGB(${features.skin_tone_rgb.join(',')})` : null;
+      hair_color = features.hair_color_rgb ? `RGB(${features.hair_color_rgb.join(',')})` : null;
+      recommended_makeup = recommendations.makeup;
+      recommended_hairstyle = recommendations.hair_style;
+    } else {
+      // Direct properties on the modelResult object
+      face_shape = modelResult.face_shape;
+      skin_tone = modelResult.skin_tone_rgb ? `RGB(${modelResult.skin_tone_rgb.join(',')})` : null;
+      hair_color = modelResult.hair_color_rgb ? `RGB(${modelResult.hair_color_rgb.join(',')})` : null;
+      
+      if (modelResult.recommendations) {
+        recommended_makeup = modelResult.recommendations.makeup;
+        recommended_hairstyle = modelResult.recommendations.hair_style;
+      } else {
+        // Generate detailed recommendations based on detected features
+        const skin_tone_rgb = modelResult.skin_tone_rgb || modelResult.features?.skin_tone_rgb || [150, 150, 150];
+        const skinBrightness = (skin_tone_rgb[0] + skin_tone_rgb[1] + skin_tone_rgb[2]) / 3;
+        const hair_texture = modelResult.hair_texture || modelResult.features?.hair_texture || "Unknown";
+        
+        if (face_shape === 'Round') {
+          recommended_makeup = `Use contouring to define cheekbones and elongate face. ${skinBrightness < 150 ? 
+            'Warm bronzers and coral blushes applied at an angle will add definition.' : 
+            'Taupe contour and rose blushes applied at an angle will add definition.'} Choose angular shapes for eyes.`;
+            
+          recommended_hairstyle = `Long layers with volume at the crown to elongate the face. ${hair_texture.includes('Curly') ? 
+            'Your natural curls with longer length will beautifully frame your face.' : 
+            hair_texture.includes('Wavy') ? 'Your natural waves with long layers will add vertical dimension.' :
+            'Consider adding texture spray for volume and movement at the crown.'}`;
+            
+        } else if (face_shape === 'Oval') {
+          recommended_makeup = `Most makeup styles work well with your balanced face shape. ${skinBrightness < 150 ? 
+            'Your skin tone pairs beautifully with warm earth tones, bronze, and copper eyeshadows.' : 
+            'Your skin tone works wonderfully with cool mauves, taupes, and soft pinks.'}`;
+            
+          recommended_hairstyle = `You're lucky - most styles work well with your face shape! ${hair_texture.includes('Curly') ? 
+            'Embrace your natural curls with a layered cut that adds volume and frames your face.' : 
+            hair_texture.includes('Wavy') ? 'Your natural waves would look stunning with face-framing layers.' :
+            'Consider trying curtain bangs or face-framing layers to accentuate your features.'}`;
+            
+        } else if (face_shape === 'Square') {
+          recommended_makeup = `Soften angles with rounded contouring techniques. ${skinBrightness < 150 ? 
+            'Use warm-toned blush applied in circular motions on the apples of your cheeks.' : 
+            'Apply soft pink or peach blush in circular motions to soften angular features.'} Focus on soft brows and rounded eye looks.`;
+            
+          recommended_hairstyle = `Soft layers and waves to soften your strong jawline. ${hair_texture.includes('Curly') ? 
+            'Your natural curls falling around your face will beautifully balance your features.' : 
+            hair_texture.includes('Wavy') ? 'Your natural waves with side-swept styling will complement your face shape.' :
+            'Consider adding soft waves around your face to balance your strong features.'}`;
+            
+        } else {
+          recommended_makeup = `Customize makeup to enhance your natural features. ${skinBrightness < 150 ? 
+            'Your skin tone works well with warm, rich colors that add dimension to your face.' : 
+            'Your skin tone pairs beautifully with soft, neutral tones that enhance your natural features.'}`;
+            
+          recommended_hairstyle = `Try a versatile mid-length cut with layers for balance. ${hair_texture.includes('Curly') ? 
+            'Your natural curls can be styled to highlight your best features.' : 
+            hair_texture.includes('Wavy') ? 'Your natural texture provides great versatility for different styling options.' :
+            'Adding light layers will give you versatility while maintaining your hair texture.'}`;
+        }
+      }
+    }
 
     // Store recommendation in database
     const recommendation = await prisma.recommendation.create({

@@ -93,12 +93,11 @@ const RecommendationDetail = () => {
       </div>
 
       <div className="recommendation-detail-content">
-        <div className="detail-image-section">
-          {recommendation.Photo?.photo_url ? (
+        <div className="detail-image-section">          {recommendation.Photo?.photo_url ? (
             <div className="detail-image-container">
               <img 
-                src={`http://localhost:3000/${recommendation.Photo.photo_url}`} 
-                alt="Your uploaded photo" 
+                src={`${process.env.REACT_APP_API_URL || ''}${recommendation.Photo.photo_url}`} 
+                alt="Your uploaded photo"
                 className="detail-image"
               />
               <div className="image-meta">

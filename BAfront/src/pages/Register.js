@@ -39,21 +39,58 @@ const Register = () => {
       return;
     }
 
-    setLoading(true);
+    setLoading(true);    try {
+      // Validate email format
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
 
-    try {
+      // Validate username
+      if (formData.username.length < 3) {
+        setError('Username must be at least 3 characters long');
+        setLoading(false);
+        return;
+      }
+
+      // Validate password strength
+      if (formData.password.length < 8) {
+        setError('Password must be at least 8 characters long');
+        setLoading(false);
+        return;
+      }
+
       // Exclude confirmPassword from data sent to API
       const { confirmPassword, ...registrationData } = formData;
       
-      const response = await authService.register(registrationData);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Convert age to number and ensure gender is lowercase
+      const processedData = {
+        ...registrationData,
+        age: parseInt(registrationData.age),
+        gender: registrationData.gender.toLowerCase()
+      };
       
-      // Redirect to profile after successful registration
-      window.location.href = '/profile';
+      const response = await authService.register(processedData);
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Redirect to profile after successful registration
+        window.location.href = '/profile';
+      } else {
+        setError('Registration successful but no token received. Please try logging in.');
+      }
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.message || 'Failed to register. Please try again.');
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message.includes('Network Error')) {
+        setError('Unable to connect to the server. Please check your internet connection.');
+      } else {
+        setError('Failed to register. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
